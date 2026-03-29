@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { RegisterDto } from 'src/auth/dto/register.dto';
+import { LoginDto } from 'src/auth/dto/login.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
@@ -15,6 +15,11 @@ export class UserService extends genericCrud<User> {
   findOne(id: number):  Promise<User | null> {
     return  this.userRepository.findOne({ where: { id }, withDeleted: true });
   } 
-
+  findByUsername(username: string){
+    return this.userRepository.findOne({ where: {username} })
+  }
+  findByEmail(email: string){
+    return this.userRepository.findOne({ where: {email} })
+  }
  
 }

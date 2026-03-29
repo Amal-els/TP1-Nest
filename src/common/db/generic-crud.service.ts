@@ -22,12 +22,11 @@ export class genericCrud<Entity extends ObjectLiteral> {
             return this.repository.restore(id);
         }
     
-    async create(addDto): Promise<Entity[]> {
-        const entity = this.repository.create(addDto);
+    async create(createDto): Promise<Entity> {
+        const entity = this.repository.create(createDto);
         const result = await this.repository.save(entity, { reload: true }); // reload ensures all defaults & relations
         console.log(result);
-        
-        return entity;
+        return entity[0];
     }
     
     async softDelete(id: number): Promise<UpdateResult>{

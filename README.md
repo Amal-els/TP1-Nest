@@ -1,19 +1,22 @@
 # TP1 - NestJS CV Management API
 
-This assignement is a backend API built with NestJS + TypeORM + MySQL.
-It manages users, CVs, and skills, with relationships between these entities and reusable CRUD logic.
+This assignment is a backend API built with NestJS + TypeORM + MySQL.
+It manages users, CVs, skills, and authentication (register/login with JWT).
 
 ## What Has Been Implemented So Far
 
-- Modular NestJS structure (`User`, `Cv`, `Skill`)
+- Modular NestJS structure (`User`, `Cv`, `Skill`, `Auth`)
 - TypeORM integration with MySQL
 - Entity relationships:
 - `User` 1..* `Cv`
 - `Cv` *..* `Skill` (via `cv_skills` join table)
 - Generic CRUD base service shared by feature services
 - REST endpoints for create/read/update/delete on all three modules
+- Authentication endpoints (`/auth/register`, `/auth/login`)
 - DTO classes for payload shape and partial update support
 - Validation decorators on create DTOs (`class-validator`)
+- Password hashing with `bcrypt`
+- JWT generation on successful login
 - Database seeding script using `@ngneat/falso`
 - Unit/e2e test files scaffolded by Nest CLI
 
@@ -23,6 +26,8 @@ It manages users, CVs, and skills, with relationships between these entities and
 - TypeScript
 - TypeORM 0.3
 - MySQL (`mysql2`)
+- JWT (`@nestjs/jwt`, `@nestjs/passport`, `passport-jwt`)
+- bcrypt
 - class-validator / class-transformer
 - Jest + Supertest
 
@@ -43,6 +48,13 @@ src/
     skill.controller.ts
     skill.service.ts
     skill.module.ts
+  auth/
+    dto/
+    auth.controller.ts
+    auth.service.ts
+    auth.module.ts
+  enums/
+    user-role.enum.ts
   user/
     dto/
     entities/
@@ -61,6 +73,7 @@ src/
 - `username`
 - `password`
 - `email`
+- `role` (enum: USER / ADMIN)
 - `cvs` (one-to-many)
 
 ### Cv
@@ -78,6 +91,39 @@ src/
 - `id`
 - `designation`
 - `cvs` (many-to-many inverse side)
+
+## Authentication Flow
+
+### Register
+- Endpoint: `POST /auth/register`
+- DTO: `RegisterDto`
+- Body:
+```json
+{
+  "username": "john",
+  "email": "john@gmail.com",
+  "password": "StrongP@ssw0rd123"
+}
+```
+- Behavior:
+- creates a new user
+- hashes password with `bcrypt`
+- enforces uniqueness (`username`, `email`)
+
+### Login
+- Endpoint: `POST /auth/login`
+- DTO: `LoginDto`
+- Body:
+```json
+{
+  "username": "john",
+  "password": "StrongP@ssw0rd123"
+}
+```
+- Behavior:
+- checks user by `username` or `email`
+- validates password
+- returns JWT `access_token`
 
 ## API Endpoints
 
@@ -102,6 +148,10 @@ src/
 - `PATCH /skill/:id`
 - `DELETE /skill/:id`
 
+### Auth
+- `POST /auth/register`
+- `POST /auth/login`
+
 ## Database Configuration
 
 Current local configuration is in `src/app.module.ts`:
@@ -113,6 +163,11 @@ Current local configuration is in `src/app.module.ts`:
 - Database: `tp1`
 - `synchronize: true`
 - `autoLoadEntities: true`
+
+JWT configuration is in `src/auth/auth.module.ts`:
+- `PassportModule` with default strategy `jwt`
+- `JwtModule` with `secret: process.env.SECRET`
+- token expiration: `3600s`
 
 ## Getting Started
 
@@ -126,7 +181,15 @@ npm install
 
 Create a database named `tp1` in your local MySQL server.
 
-### 3) Run the app
+### 3) Configure environment variable
+
+Create a `.env` file at the project root:
+
+```env
+SECRET=your_jwt_secret_here
+```
+
+### 4) Run the app
 
 ```bash
 # dev watch mode
@@ -138,7 +201,7 @@ npm run start
 
 By default, the API runs on `http://localhost:3000`.
 
-### 4) Seed test data (optional)
+### 5) Seed test data (optional)
 
 ```bash
 npm run seed:db
@@ -163,12 +226,13 @@ This inserts random users, skills, and CVs with linked relations.
 - Project uses a reusable generic CRUD service and per-module service extension.
 - DTO validation decorators exist on create DTOs.
 - Core CRUD routes are in place for all modules.
+- Authentication module is integrated with JWT.
 - Seeding workflow is operational for demo/test data.
 
 ## Next Improvements (Optional)
 
-- Enable global `ValidationPipe` in `main.ts` to enforce DTO validation at runtime.
-- Add authentication/authorization (guard + JWT).
+- Add JWT auth guards to protect selected endpoints.
+- Add role-based authorization guards (`USER` vs `ADMIN`).
 - Add Swagger docs for endpoint exploration.
 - Add pagination/filtering for list endpoints.
 - Strengthen tests for services/controllers and seeding behavior.

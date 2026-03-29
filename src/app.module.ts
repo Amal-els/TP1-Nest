@@ -4,8 +4,8 @@ import { AppService } from './app.service';
 import { CvModule } from './cv/cv.module';
 import { SkillModule } from './skill/skill.module';
 import { UserModule } from './user/user.module';
-import { Type } from 'class-transformer';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [CvModule, SkillModule, UserModule, 
@@ -20,7 +20,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       synchronize: true,
       logging: true,
     },
-  )
+  ), AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],
