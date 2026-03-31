@@ -9,6 +9,7 @@ export class CreateCvDto {
     age: number;
     @IsNotEmpty()
     Cin: number;
+    @IsNotEmpty()
     Job: string;
     @IsNotEmpty()
     path: string;
