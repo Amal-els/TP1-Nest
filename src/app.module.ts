@@ -8,6 +8,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { FirstMiddleware } from './middlewares/first-middleware/first-middleware.middleware';
 import { logger } from './middlewares/logger';
+import { AuthMiddleware } from './middlewares/auth/auth.middleware';
+import { ConfigModule } from '@nestjs/config';
 @Module({
   imports: [CvModule, SkillModule, UserModule, 
     TypeOrmModule.forRoot({
@@ -21,7 +23,10 @@ import { logger } from './middlewares/logger';
       synchronize: true,
       logging: true,
     },
-  ), AuthModule
+  ), AuthModule,
+    ConfigModule.forRoot({
+      isGlobal: true, // makes process.env available globally
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
@@ -31,5 +36,6 @@ export class AppModule implements NestModule {
     consumer.apply(FirstMiddleware, logger).forRoutes('cv',
       { path: 'skill', method: RequestMethod.POST },
     );
+    consumer.apply(AuthMiddleware).forRoutes('cv');
   }
 }

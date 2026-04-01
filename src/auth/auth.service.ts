@@ -43,6 +43,7 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(password, salt);
     if(bcrypt.compare(user.password, hashedPassword)){
       const jwt = await this.jwtService.sign({
+        userId: user.id,
         username: user.username,
         email: user.email,
         password
