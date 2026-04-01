@@ -11,7 +11,11 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  await app.listen(3000);
+  app.use((req, res, next) => {
+    console.log('Request URL:', req.url);
+    next();
+  });
+  await app.listen(3001);
   console.log(process.env.PORT);
   
 }
